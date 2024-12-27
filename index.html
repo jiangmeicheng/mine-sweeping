@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>扫雷游戏</title>
+  <style>
+    #board {
+      display: grid;
+      grid-template-columns: repeat(10, 30px);
+      grid-gap: 2px;
+    }
+
+    .cell {
+      width: 30px;
+      height: 30px;
+      background-color: lightgray;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .mine {
+      background-color: red;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>扫雷游戏</h1>
+  <div id="board"></div>
+  <script>
+    const rows = 10;
+    const cols = 10;
+    const minesCount = 10;
+    let board = [];
+    let revealed = [];
+    let gameOver = false;
+    // 生成一个 10x10 的棋盘，并随机布置 10 个地雷。
+    function initBoard () {
+      // 生成棋盘
+      board = Array.from({ length: rows }, () => Array(cols).fill(0));
+      revealed = Array.from({ length: rows }, () => Array(cols).fill(false));
+      placeMines();
+      calculateNumbers();
+      renderBoard();
+    }
+    // 地雷布置 随机选择位置放置地雷。
+    function placeMines () {
+      let minesPlaced = 0;
+      while (minesPlaced < minesCount) {
+        const row = Math.floor(Math.random() * rows);
+        const col = Math.floor(Math.random() * cols);
+        if (board[row][col] !== 'M') {
+          board[row][col] = 'M';
+          minesPlaced++;
+        }
+      }
+    }
+    // 计算每个格子周围的地雷数量。
+    function calculateNumbers () {
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (board[r][c] === 'M') continue;
+          let count = 0;
+          for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+              const newRow = r + i;
+              const newCol = c + j;
+              if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && board[newRow][newCol] === 'M') {
+                count++;
+              }
+            }
+          }
+          board[r][c] = count;
+        }
+      }
+    }
+
+    function renderBoard () {
+      const boardElement = document.getElementById('board');
+      boardElement.innerHTML = '';
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.onclick = () => revealCell(r, c);
+          if (revealed[r][c]) {
+            cell.textContent = board[r][c] === 'M' ? '💣' : board[r][c] || '';
+            if (board[r][c] === 'M') cell.classList.add('mine');
+          }
+          boardElement.appendChild(cell);
+        }
+      }
+    }
+
+    function revealCell (r, c) {
+      if (gameOver || revealed[r][c]) return;
+      revealed[r][c] = true;
+      if (board[r][c] === 'M') {
+        gameOver = true;
+        alert("Game Over");
+      } else {
+        checkWin();
+        renderBoard();
+      }
+    }
+    // 检查是否成功揭开所有非雷区域。
+    function checkWin () {
+      const totalCells = rows * cols;
+      const revealedCells = revealed.flat().filter(Boolean).length;
+      if (revealedCells === totalCells - minesCount) {
+        alert("Congratulations! You Win!");
+        gameOver = true;
+      }
+    }
+
+    initBoard();
+  </script>
+</body>
+
+</html>
