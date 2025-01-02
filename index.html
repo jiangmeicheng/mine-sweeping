@@ -78,6 +78,7 @@
             for (let j = -1; j <= 1; j++) {
               const newRow = r + i;
               const newCol = c + j;
+              // 判断当前检查的格子是否在棋盘的有效范围内，并且该格子是否是一个地雷（'M'）
               if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && board[newRow][newCol] === 'M') {
                 count++;
               }
